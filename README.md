@@ -1,16 +1,64 @@
-# React + Vite
+# Product Listing & Filtering UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern and responsive **Product Listing web application** built using **React.js** and **Tailwind CSS**.  
+The app consumes data from a public API and provides search, filtering, sorting, and detailed product views, following clean and scalable frontend architecture.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- Product listing using **DummyJSON API**
+- Search with auto-suggestions
+- Category-based filtering
+- Price range filtering (INR)
+- Sort by price (Low → High, High → Low)
+- Product details page with image gallery
+- Similar products recommendation
+- Fully responsive design
+- Clean, modular, and maintainable codebase
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+---
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **React.js** (Vite)
+- **Tailwind CSS**
+- **React Router DOM**
+- **Custom Hooks**
+- **REST API (DummyJSON)**
+
+---
+
+## Folder Structure
+- **components/** → Reusable UI components  
+- **hooks/** → Custom hooks for data fetching and logic  
+- **pages/** → Route-level components  
+- **services/** → Centralized API layer  
+- **App.jsx** → Routing and global state orchestration
+
+---
+
+## Setup Instructions
+
+### Clone the repository
+
+```bash
+git clone https://github.com/your-username/product-listing-ui.git
+cd product-listing-ui
+```
+### Install Dependencies
+- npm install
+
+### Start the development server
+- npm run dev
+
+## API Used
+
+This project uses the **DummyJSON Products API** to fetch product-related data.
+
+- Fetch all products  
+  https://dummyjson.com/products
+
+- Fetch a product by ID  
+  https://dummyjson.com/products/{id}
+
