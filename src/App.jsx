@@ -1,16 +1,16 @@
 import { BrowserRouter, Routes, Route, useSearchParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import ProductDetails from "./pages/ProductDetails";
+import { useProducts } from "./hooks/useProducts";
 
 function AppContent() {
-  const [products, setProducts] = useState([]);
+  const { products, loading, error } = useProducts();
 
   const categories = ["groceries", "beauty", "fragrances", "furniture"];
 
   const [searchParams] = useSearchParams();
-
   const search = searchParams.get("search") || "";
   const selectedCategory = searchParams.get("category") || "all";
 
@@ -18,11 +18,13 @@ function AppContent() {
   const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState("");
 
-  useEffect(() => {
-    fetch("https://dummyjson.com/products")
-      .then(res => res.json())
-      .then(data => setProducts(data.products));
-  }, []);
+  if (loading) {
+    return <p className="pt-28 text-center">Loading products...</p>;
+  }
+
+  if (error) {
+    return <p className="pt-28 text-center text-red-500">{error}</p>;
+  }
 
   return (
     <>

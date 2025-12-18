@@ -1,5 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MdHome } from "react-icons/md";
+import { IoFilterSharp } from "react-icons/io5";
+
+const MAX_PRICE_INR = 10000; 
 
 const Navbar = ({
   products,
@@ -16,9 +20,10 @@ const Navbar = ({
   const [query, setQuery] = useState(search);
   const [suggestions, setSuggestions] = useState([]);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [showFilter, setShowFilter] = useState(false);
 
+  const filterRef = useRef(null);
   const navigate = useNavigate();
-
   useEffect(() => {
     setQuery(search);
   }, [search]);
@@ -36,13 +41,20 @@ const Navbar = ({
       )
     );
   }, [query, products]);
-
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setShowFilter(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   const goHome = (params = "") => {
     navigate(`/${params}`);
     setSuggestions([]);
     setActiveIndex(-1);
   };
-
   const handleKeyDown = (e) => {
     if (e.key === "ArrowDown" && suggestions.length) {
       setActiveIndex((prev) => (prev + 1) % suggestions.length);
@@ -85,14 +97,13 @@ const Navbar = ({
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md px-4 py-3">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
 
-        {/* LEFT: Home + Categories */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-5 flex-wrap">
           <button
             onClick={() => goHome()}
-            className="p-2 border rounded-full"
+            className="p-1 border-hidden"
             title="Home"
           >
-            🏠
+            <MdHome size={30} />
           </button>
 
           <button
@@ -117,19 +128,19 @@ const Navbar = ({
           ))}
         </div>
 
-        {/* RIGHT: Search + Filters */}
-        <div className="relative flex gap-3">
+        <div className="relative flex gap-3 items-center">
+
           <input
             type="text"
             placeholder="Search product or category..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="border px-3 py-2 rounded sm:w-64"
+            className="border px-3 py-2 rounded-full sm:w-64"
           />
 
           {suggestions.length > 0 && (
-            <div className="absolute top-12 left-0 w-full bg-white border rounded shadow-md max-h-60 overflow-y-auto">
+            <div className="absolute top-12 left-0 w-full bg-white border rounded shadow-md max-h-60 overflow-y-auto z-50">
               {suggestions.map((item, idx) => (
                 <div
                   key={item.id}
@@ -149,33 +160,59 @@ const Navbar = ({
             </div>
           )}
 
-          <input
-            type="number"
-            placeholder="Min ₹"
-            value={minPrice}
-            onChange={(e) => setMinPrice(e.target.value)}
-            className="border px-3 py-2 rounded w-24"
-          />
+          <div ref={filterRef} className="relative">
+            <button
+              onClick={() => setShowFilter(prev => !prev)}
+              className="p-2 border rounded-full hover:bg-gray-100"
+              title="Filters"
+            >
+              <IoFilterSharp size={20} />
+            </button>
 
-          <input
-            type="number"
-            placeholder="Max ₹"
-            value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
-            className="border px-3 py-2 rounded w-24"
-          />
+            {showFilter && (
+              <div className="absolute right-0 top-12 w-72 bg-white border rounded-lg shadow-lg p-4 z-50">
 
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className="border px-3 py-2 rounded"
-          >
-            <option value="">Sort</option>
-            <option value="low">Price: Low → High</option>
-            <option value="high">Price: High → Low</option>
-          </select>
+                <div className="mb-4">
+                  <p className="font-semibold mb-2">Price Range (₹)</p>
+
+                  <div className="flex items-center gap-2 text-sm mb-2">
+                    <span>₹{minPrice || 0}</span>
+                    <span>–</span>
+                    <span>₹{maxPrice || MAX_PRICE_INR}</span>
+                  </div>
+
+                  <input
+                    type="range"
+                    min="0"
+                    max={MAX_PRICE_INR}
+                    step="500"
+                    value={maxPrice || MAX_PRICE_INR}
+                    onChange={(e) => {
+                      setMinPrice(0);
+                      setMaxPrice(e.target.value);
+                    }}
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <p className="font-semibold mb-2">Sort by Price</p>
+                  <select
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value)}
+                    className="border px-3 py-2 rounded w-full"
+                  >
+                    <option value="">None</option>
+                    <option value="low">Low → High</option>
+                    <option value="high">High → Low</option>
+                  </select>
+                </div>
+
+              </div>
+            )}
+          </div>
+
         </div>
-
       </div>
     </nav>
   );

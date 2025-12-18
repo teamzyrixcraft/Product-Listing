@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import ProductCard from "../components/ProductCard";
 
+const INR_RATE = 90;
+
 const Home = ({
   products,
   search,
@@ -24,20 +26,20 @@ const Home = ({
       );
     }
 
-    data = data.filter(p =>
-      (minPrice === "" || p.price >= Number(minPrice)) &&
-      (maxPrice === "" || p.price <= Number(maxPrice))
-    );
+    // ✅ Price filter in INR
+    data = data.filter(p => {
+      const priceInINR = p.price * INR_RATE;
+      return (
+        (minPrice === "" || priceInINR >= Number(minPrice)) &&
+        (maxPrice === "" || priceInINR <= Number(maxPrice))
+      );
+    });
 
     if (sort === "low") data.sort((a, b) => a.price - b.price);
     if (sort === "high") data.sort((a, b) => b.price - a.price);
 
     return data;
   }, [products, search, selectedCategory, minPrice, maxPrice, sort]);
-
-  if (!products.length) {
-    return <p className="pt-28 text-center">Loading products...</p>;
-  }
 
   if (!filteredProducts.length) {
     return <p className="pt-28 text-center">No products found</p>;
