@@ -1,105 +1,102 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = ({
   products,
+  categories,
   search,
-  setSearch,
+  selectedCategory,
   minPrice,
   setMinPrice,
   maxPrice,
   setMaxPrice,
-  categories,
-  selectedCategory,
-  setSelectedCategory,
   sort,
   setSort,
 }) => {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(search);
   const [suggestions, setSuggestions] = useState([]);
+  const [activeIndex, setActiveIndex] = useState(-1);
 
   const navigate = useNavigate();
-  const location = useLocation();
+
+  useEffect(() => {
+    setQuery(search);
+  }, [search]);
 
   useEffect(() => {
     if (!query.trim()) {
       setSuggestions([]);
+      setActiveIndex(-1);
       return;
     }
 
-    const filtered = products.filter(p =>
-      p.title.toLowerCase().includes(query.toLowerCase())
+    setSuggestions(
+      products.filter(p =>
+        p.title.toLowerCase().includes(query.toLowerCase())
+      )
     );
-
-    setSuggestions(filtered);
   }, [query, products]);
 
-  const goHomeIfNeeded = () => {
-    if (location.pathname !== "/") {
-      navigate("/");
-    }
-  };
-
-  const handleCategoryClick = (category) => {
-    goHomeIfNeeded();
-    setSearch("");
-    setQuery("");
-    setSelectedCategory(category);
-  };
-
-  const handleHomeClick = () => {
-    navigate("/");
-    setSearch("");
-    setQuery("");
-    setSelectedCategory("all");
-  };
-
-  const handleSuggestionClick = (title) => {
-    goHomeIfNeeded();
-    setSearch(title);
-    setQuery(title);
+  const goHome = (params = "") => {
+    navigate(`/${params}`);
     setSuggestions([]);
-    setSelectedCategory("all");
+    setActiveIndex(-1);
   };
 
-  const handleSearchSubmit = (e) => {
+  const handleKeyDown = (e) => {
+    if (e.key === "ArrowDown" && suggestions.length) {
+      setActiveIndex((prev) => (prev + 1) % suggestions.length);
+      return;
+    }
+
+    if (e.key === "ArrowUp" && suggestions.length) {
+      setActiveIndex((prev) =>
+        prev <= 0 ? suggestions.length - 1 : prev - 1
+      );
+      return;
+    }
+
+    if (e.key === "Escape") {
+      setSuggestions([]);
+      setActiveIndex(-1);
+      return;
+    }
+
     if (e.key !== "Enter") return;
 
-    goHomeIfNeeded();
+    e.preventDefault();
+    const q = query.trim().toLowerCase();
+    if (!q) return;
 
-    const lowerQuery = query.toLowerCase();
-
-    const categoryMatch = categories.find(
-      cat => cat.toLowerCase() === lowerQuery
-    );
-
-    if (categoryMatch) {
-      setSelectedCategory(categoryMatch);
-      setSearch("");
-    } else {
-      setSelectedCategory("all");
-      setSearch(query);
+    if (activeIndex >= 0 && suggestions[activeIndex]) {
+      goHome(`?search=${encodeURIComponent(suggestions[activeIndex].title)}`);
+      return;
     }
 
-    setSuggestions([]);
+    const matchedCategory = categories.find(cat => cat === q);
+    if (matchedCategory) {
+      goHome(`?category=${matchedCategory}`);
+    } else {
+      goHome(`?search=${encodeURIComponent(q)}`);
+    }
   };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md px-4 py-3">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
 
-        {/* LEFT: Home Icon + Categories */}
-        <div className="flex flex-wrap gap-2 items-center">
+        {/* LEFT: Home + Categories */}
+        <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={handleHomeClick}
-            className="p-2 border rounded-full hover:bg-gray-100"
+            onClick={() => goHome()}
+            className="p-2 border rounded-full"
             title="Home"
           >
             🏠
           </button>
 
           <button
-            onClick={() => handleCategoryClick("all")}
+            onClick={() => goHome()}
             className={`px-3 py-1 rounded-full border ${
               selectedCategory === "all" ? "bg-blue-500 text-white" : ""
             }`}
@@ -110,7 +107,7 @@ const Navbar = ({
           {categories.map(cat => (
             <button
               key={cat}
-              onClick={() => handleCategoryClick(cat)}
+              onClick={() => goHome(`?category=${cat}`)}
               className={`px-3 py-1 rounded-full border capitalize ${
                 selectedCategory === cat ? "bg-blue-500 text-white" : ""
               }`}
@@ -120,24 +117,31 @@ const Navbar = ({
           ))}
         </div>
 
-        {/* RIGHT: Search + Filters + Sort */}
-        <div className="relative flex flex-col sm:flex-row gap-3">
+        {/* RIGHT: Search + Filters */}
+        <div className="relative flex gap-3">
           <input
             type="text"
-            placeholder="Search products or category..."
+            placeholder="Search product or category..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleSearchSubmit}
+            onKeyDown={handleKeyDown}
             className="border px-3 py-2 rounded sm:w-64"
           />
 
           {suggestions.length > 0 && (
-            <div className="absolute top-12 left-0 w-full sm:w-64 bg-white border rounded shadow-md max-h-60 overflow-y-auto z-50">
-              {suggestions.map(item => (
+            <div className="absolute top-12 left-0 w-full bg-white border rounded shadow-md max-h-60 overflow-y-auto">
+              {suggestions.map((item, idx) => (
                 <div
                   key={item.id}
-                  onClick={() => handleSuggestionClick(item.title)}
-                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                  onMouseEnter={() => setActiveIndex(idx)}
+                  onClick={() =>
+                    goHome(`?search=${encodeURIComponent(item.title)}`)
+                  }
+                  className={`px-3 py-2 cursor-pointer ${
+                    idx === activeIndex
+                      ? "bg-blue-100"
+                      : "hover:bg-gray-100"
+                  }`}
                 >
                   {item.title}
                 </div>

@@ -4,9 +4,9 @@ import ProductCard from "../components/ProductCard";
 const Home = ({
   products,
   search,
+  selectedCategory,
   minPrice,
   maxPrice,
-  selectedCategory,
   sort,
 }) => {
   const filteredProducts = useMemo(() => {
@@ -33,7 +33,7 @@ const Home = ({
     if (sort === "high") data.sort((a, b) => b.price - a.price);
 
     return data;
-  }, [products, search, minPrice, maxPrice, selectedCategory, sort]);
+  }, [products, search, selectedCategory, minPrice, maxPrice, sort]);
 
   if (!products.length) {
     return <p className="pt-28 text-center">Loading products...</p>;
