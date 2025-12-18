@@ -1,33 +1,50 @@
+import { useMemo } from "react";
 import ProductCard from "../components/ProductCard";
-import Filters from "../components/Filters";
-import { useProducts } from "../hooks/useProducts";
-import { useState } from "react";
 
+const Home = ({
+  products,
+  search,
+  minPrice,
+  maxPrice,
+  selectedCategory,
+  sort,
+}) => {
+  const filteredProducts = useMemo(() => {
+    let data = [...products];
 
-const Home = () => {
-  const { products, loading } = useProducts();
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("");
-  // const [search, setSearch] = useState("");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+    if (search) {
+      data = data.filter(p =>
+        p.title.toLowerCase().includes(search.toLowerCase())
+      );
+    }
 
-  let filtered = products.filter((p) =>
-    p.title.toLowerCase().includes(search.toLowerCase())
-  );
+    if (selectedCategory !== "all") {
+      data = data.filter(p => p.category === selectedCategory);
+    }
 
-  if (sort === "low") filtered.sort((a, b) => a.price - b.price);
-  if (sort === "high") filtered.sort((a, b) => b.price - a.price);
+    data = data.filter(p =>
+      (minPrice === "" || p.price >= Number(minPrice)) &&
+      (maxPrice === "" || p.price <= Number(maxPrice))
+    );
 
-  if (loading) return <p>Loading...</p>;
+    if (sort === "low") data.sort((a, b) => a.price - b.price);
+    if (sort === "high") data.sort((a, b) => b.price - a.price);
+
+    return data;
+  }, [products, search, minPrice, maxPrice, selectedCategory, sort]);
+
+  if (!products.length) {
+    return <p className="pt-28 text-center">Loading products...</p>;
+  }
+
+  if (!filteredProducts.length) {
+    return <p className="pt-28 text-center">No products found</p>;
+  }
 
   return (
-    <div className="p-6">
-      <Filters {...{ search, setSearch, sort, setSort }} />
-
+    <div className="pt-28 px-6 pb-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-        {filtered.map((product) => (
+        {filteredProducts.map(product => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
