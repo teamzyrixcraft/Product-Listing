@@ -6,7 +6,14 @@ import ProductDetails from "./pages/ProductDetails";
 
 function App() {
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+
+  // 🔹 Categories stored in lowercase (IMPORTANT)
+  const [categories] = useState([
+    "groceries",
+    "beauty",
+    "fragrances",
+    "furniture",
+  ]);
 
   const [search, setSearch] = useState("");
   const [minPrice, setMinPrice] = useState("");
@@ -18,8 +25,6 @@ function App() {
     fetch("https://dummyjson.com/products")
       .then(res => res.json())
       .then(data => setProducts(data.products));
-
-    setCategories(["Groceries", "Beauty", "Fragrances", "Furniture"]);
   }, []);
 
   return (

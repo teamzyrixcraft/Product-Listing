@@ -19,7 +19,9 @@ const Home = ({
     }
 
     if (selectedCategory !== "all") {
-      data = data.filter(p => p.category === selectedCategory);
+      data = data.filter(
+        p => p.category.toLowerCase() === selectedCategory.toLowerCase()
+      );
     }
 
     data = data.filter(p =>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = ({
   products,
@@ -17,6 +18,9 @@ const Navbar = ({
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
   useEffect(() => {
     if (!query.trim()) {
       setSuggestions([]);
@@ -30,9 +34,53 @@ const Navbar = ({
     setSuggestions(filtered);
   }, [query, products]);
 
+  const goHomeIfNeeded = () => {
+    if (location.pathname !== "/") {
+      navigate("/");
+    }
+  };
+
+  const handleCategoryClick = (category) => {
+    goHomeIfNeeded();
+    setSearch("");
+    setQuery("");
+    setSelectedCategory(category);
+  };
+
+  const handleHomeClick = () => {
+    navigate("/");
+    setSearch("");
+    setQuery("");
+    setSelectedCategory("all");
+  };
+
   const handleSuggestionClick = (title) => {
+    goHomeIfNeeded();
     setSearch(title);
     setQuery(title);
+    setSuggestions([]);
+    setSelectedCategory("all");
+  };
+
+  const handleSearchSubmit = (e) => {
+    if (e.key !== "Enter") return;
+
+    goHomeIfNeeded();
+
+    const lowerQuery = query.toLowerCase();
+
+    const categoryMatch = categories.find(
+      cat => cat.toLowerCase() === lowerQuery
+    );
+
+    if (categoryMatch) {
+      setSelectedCategory(categoryMatch);
+      setSearch("");
+    } else {
+      setSelectedCategory("all");
+      setSearch(query);
+    }
+
     setSuggestions([]);
   };
 
@@ -40,10 +88,18 @@ const Navbar = ({
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md px-4 py-3">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
 
-        {/* LEFT: Categories */}
-        <div className="flex flex-wrap gap-2">
+        {/* LEFT: Home Icon + Categories */}
+        <div className="flex flex-wrap gap-2 items-center">
           <button
-            onClick={() => setSelectedCategory("all")}
+            onClick={handleHomeClick}
+            className="p-2 border rounded-full hover:bg-gray-100"
+            title="Home"
+          >
+            🏠
+          </button>
+
+          <button
+            onClick={() => handleCategoryClick("all")}
             className={`px-3 py-1 rounded-full border ${
               selectedCategory === "all" ? "bg-blue-500 text-white" : ""
             }`}
@@ -54,7 +110,7 @@ const Navbar = ({
           {categories.map(cat => (
             <button
               key={cat}
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => handleCategoryClick(cat)}
               className={`px-3 py-1 rounded-full border capitalize ${
                 selectedCategory === cat ? "bg-blue-500 text-white" : ""
               }`}
@@ -66,16 +122,15 @@ const Navbar = ({
 
         {/* RIGHT: Search + Filters + Sort */}
         <div className="relative flex flex-col sm:flex-row gap-3">
-          {/* Search Input */}
           <input
             type="text"
-            placeholder="Search products..."
+            placeholder="Search products or category..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleSearchSubmit}
             className="border px-3 py-2 rounded sm:w-64"
           />
 
-          {/* Suggestions Box */}
           {suggestions.length > 0 && (
             <div className="absolute top-12 left-0 w-full sm:w-64 bg-white border rounded shadow-md max-h-60 overflow-y-auto z-50">
               {suggestions.map(item => (
@@ -111,9 +166,9 @@ const Navbar = ({
             onChange={(e) => setSort(e.target.value)}
             className="border px-3 py-2 rounded"
           >
-            <option value="">Sort By Price</option>
-            <option value="low">Low → High</option>
-            <option value="high">High → Low</option>
+            <option value="">Sort</option>
+            <option value="low">Price: Low → High</option>
+            <option value="high">Price: High → Low</option>
           </select>
         </div>
 
