@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import ProductCard from "../components/ProductCard";
 
-const INR_RATE = 90;
+const INR_RATE = 1;
 
 const Home = ({
   products,
@@ -26,7 +26,6 @@ const Home = ({
       );
     }
 
-    // ✅ Price filter in INR
     data = data.filter(p => {
       const priceInINR = p.price * INR_RATE;
       return (
