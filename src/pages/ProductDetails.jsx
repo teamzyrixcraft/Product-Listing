@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import {
-  fetchProductById,
-  fetchProductsByCategory,
-} from "../services/api";
+import { fetchProductById, fetchProductsByCategory, } from "../services/api";
 
 const INR_RATE = 1;
 

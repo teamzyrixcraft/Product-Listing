@@ -45,7 +45,7 @@ const Home = ({
   }
 
   return (
-    <div className="pt-28 px-6 pb-6">
+    <div className="pt-40  md:pt-28 px-6 pb-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {filteredProducts.map(product => (
           <ProductCard key={product.id} product={product} />
